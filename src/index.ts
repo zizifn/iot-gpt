@@ -1,6 +1,7 @@
 import { getMiIOT, getMiNA } from "mi-service-lite";
 
 const MI_DID="小爱音箱Pro";
+const msg = new Map<string, any>()
 async function main() {
   console.log("hello world!", process.env.MI_USER_ID);
   const config = {
@@ -10,15 +11,26 @@ async function main() {
   };
   const MiNA = await getMiNA(config);
   const MiIOT = await getMiIOT(config);
-  console.log("MiNA devices", await MiNA?.getDevices());
+//   console.log("MiNA devices", await MiNA?.getDevices());
 
-  const msgs = await MiNA?.getConversations({
-    limit: 1
-  })
-  console.dir(msgs?.records ,  {depth: 10});
+  setInterval(async () => {
+    const msgs = await MiNA?.getConversations({
+        limit: 1
+      })
+      console.dir(msgs?.records ,  {depth: 10});
+      const requestId = msgs?.records[0]?.requestId|| ''
+      if(!msg.has(requestId)){
+        msg.set(msgs?.records[0]?.requestId|| '', msgs?.records[0]);
+        const tts = msgs?.records[0]?.answers.find((a: any) => a.type === 'TTS') || '';
+        console.log('---------', tts);
+        await MiIOT?.doAction(5, 1, `回答已经被截断，我的上一个问题是，${msgs?.records[0]?.query}. 答案是：${tts.tts.text}`);
+      }
+  }, 1000);
+
+
 //   console.log("MiIOT devices", await MiIOT?.getDevices());
   // Find your device Spec here: https://home.miot-spec.com/
-  await MiIOT?.doAction(5, 1, "Hello world, 你好！");
+  
 }
 
 main();
