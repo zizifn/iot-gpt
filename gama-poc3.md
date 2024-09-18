@@ -9,7 +9,7 @@
 
 ### 未来状态
 
-![小米音箱](./architecture1.excalidraw.png)
+![小米音箱](./architecture2.excalidraw.png)
 
 
 ## Doc
